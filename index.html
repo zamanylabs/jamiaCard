@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JamiaCard — Carte Universitaire Intelligente</title>
+<style>
+  :root {
+    --primary: #007AFF;
+    --success: #34C759;
+    --warning: #FF9500;
+    --danger:  #FF3B30;
+    --purple:  #5856D6;
+    --dark:    #0A0A0F;
+    --dark2:   #111118;
+    --dark3:   #1C1C1E;
+    --dark4:   #2C2C2E;
+    --glass:   rgba(255,255,255,0.06);
+    --border:  rgba(255,255,255,0.10);
+    --text1:   #FFFFFF;
+    --text2:   rgba(255,255,255,0.65);
+    --text3:   rgba(255,255,255,0.35);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    background: var(--dark);
+    color: var(--text1);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--primary); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { color: var(--text2); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--text1); }
+  .nav-cta {
+    background: var(--primary); color: #fff; border: none; border-radius: 20px;
+    padding: 8px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: opacity .2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── SECTIONS ── */
+  section { padding: 100px 10%; }
+  section:first-of-type { padding-top: 140px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(0,122,255,0.15); border: 1px solid rgba(0,122,255,0.35);
+    color: var(--primary); border-radius: 20px;
+    padding: 5px 14px; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 20px;
+  }
+  h1 { font-size: clamp(38px, 6vw, 72px); font-weight: 800; letter-spacing: -2px; line-height: 1.05; }
+  h2 { font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+  h3 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .highlight { color: var(--primary); }
+  .highlight-gold { color: var(--warning); }
+  .highlight-green { color: var(--success); }
+  .sub { color: var(--text2); font-size: 18px; margin-top: 16px; max-width: 600px; line-height: 1.7; }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
+  .orb1 { width: 500px; height: 500px; background: rgba(0,122,255,0.15); top: -100px; left: -100px; }
+  .orb2 { width: 400px; height: 400px; background: rgba(88,86,214,0.12); bottom: 0; right: -80px; }
+  .orb3 { width: 300px; height: 300px; background: rgba(255,149,0,0.10); top: 40%; left: 40%; }
+  #hero h1 { position: relative; }
+  .hero-sub { color: var(--text2); font-size: 20px; margin-top: 20px; max-width: 620px; line-height: 1.7; }
+  .hero-cta { display: flex; gap: 16px; margin-top: 40px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--primary); color: #fff; border: none; border-radius: 14px;
+    padding: 16px 32px; font-size: 16px; font-weight: 700; cursor: pointer;
+    transition: transform .2s, opacity .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { transform: translateY(-2px); opacity: 0.9; }
+  .btn-outline {
+    background: transparent; color: var(--text1);
+    border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 16px 32px; font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: border-color .2s, background .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.3); background: var(--glass); }
+  .hero-stats { display: flex; gap: 48px; margin-top: 64px; justify-content: center; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 42px; font-weight: 800; letter-spacing: -1px; }
+  .stat-label { color: var(--text3); font-size: 13px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  /* ── PROBLEM ── */
+  #problem { background: linear-gradient(180deg, var(--dark) 0%, var(--dark2) 100%); }
+  .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 48px; }
+  .problem-card {
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px;
+    transition: transform .2s, border-color .2s;
+  }
+  .problem-card:hover { transform: translateY(-4px); border-color: rgba(255,59,48,0.3); }
+  .problem-icon { font-size: 32px; margin-bottom: 16px; }
+  .problem-card h3 { color: var(--danger); margin-bottom: 8px; }
+  .problem-card p { color: var(--text2); font-size: 15px; line-height: 1.6; }
+
+  /* ── SOLUTION ── */
+  #solution { text-align: center; }
+  .card-label {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--success); background: rgba(52,199,89,0.12);
+    border: 1px solid rgba(52,199,89,0.25); border-radius: 8px; padding: 3px 10px; margin-bottom: 12px;
+  }
+  .solution-visual {
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    margin-top: 56px; flex-wrap: wrap;
+  }
+  .solution-step {
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px 24px; width: 180px; text-align: center;
+    position: relative; transition: transform .2s;
+  }
+  .solution-step:hover { transform: translateY(-6px); }
+  .step-icon {
+    width: 64px; height: 64px; border-radius: 18px; margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+  }
+  .step-num {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--primary); color: #fff; width: 24px; height: 24px; border-radius: 12px;
+    font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  }
+  .step-title { font-size: 14px; font-weight: 700; color: var(--text1); margin-bottom: 6px; }
+  .step-sub { font-size: 12px; color: var(--text3); line-height: 1.5; }
+  .step-arrow { color: var(--text3); font-size: 20px; padding: 0 8px; align-self: center; }
+
+  /* ── FEATURES ── */
+  #features { background: var(--dark2); }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 48px; }
+  .feature-card {
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px; transition: transform .2s, border-color .2s;
+  }
+  .feature-card:hover { transform: translateY(-4px); }
+  .feature-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .feature-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+  }
+  .feature-card h3 { font-size: 17px; }
+  .feature-card p { color: var(--text2); font-size: 14px; line-height: 1.65; }
+  .feature-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .tag {
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 8px;
+    background: rgba(255,255,255,0.07); color: var(--text3); border: 1px solid var(--border);
+  }
+
+  /* ── USER STORIES ── */
+  #stories { background: var(--dark); }
+  .stories-tabs { display: flex; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; }
+  .tab {
+    padding: 10px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
+    border: 1.5px solid var(--border); background: transparent; color: var(--text2);
+    cursor: pointer; transition: all .2s;
+  }
+  .tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .story-panel { display: none; }
+  .story-panel.active { display: block; }
+  .story-flow { display: flex; flex-direction: column; gap: 16px; }
+  .story-step {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px;
+  }
+  .story-step-num {
+    width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #fff;
+  }
+  .story-step-content h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .story-step-content p { color: var(--text2); font-size: 14px; line-height: 1.55; }
+  .story-step-content code {
+    background: rgba(255,255,255,0.08); border-radius: 6px; padding: 1px 6px;
+    font-size: 12px; font-family: 'SF Mono', 'Menlo', monospace; color: var(--warning);
+  }
+
+  /* ── SECURITY ── */
+  #security { background: var(--dark2); }
+  .security-layers { display: flex; gap: 24px; margin-top: 48px; flex-wrap: wrap; }
+  .security-layer {
+    flex: 1; min-width: 220px; background: var(--glass);
+    border: 1px solid var(--border); border-radius: 20px; padding: 28px;
+    text-align: center;
+  }
+  .security-layer .icon { font-size: 40px; margin-bottom: 16px; }
+  .security-layer h3 { margin-bottom: 8px; }
+  .security-layer p { color: var(--text2); font-size: 14px; line-height: 1.6; }
+
+  /* ── ROI ── */
+  #roi { background: var(--dark); }
+  .roi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 48px; }
+  .roi-card {
+    background: linear-gradient(135deg, var(--glass), transparent);
+    border: 1px solid var(--border); border-radius: 20px; padding: 28px;
+    text-align: center;
+  }
+  .roi-value { font-size: 48px; font-weight: 800; letter-spacing: -2px; line-height: 1; margin-bottom: 8px; }
+  .roi-label { color: var(--text2); font-size: 14px; }
+
+  /* ── PRICING ── */
+  #pricing { background: var(--dark2); }
+  .pricing-cards { display: flex; gap: 24px; margin-top: 48px; flex-wrap: wrap; justify-content: center; }
+  .pricing-card {
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 24px; padding: 36px 28px; width: 280px;
+    transition: transform .2s; position: relative; text-align: center;
+  }
+  .pricing-card.featured {
+    border-color: var(--primary); background: rgba(0,122,255,0.08);
+    transform: scale(1.03);
+  }
+  .pricing-card:hover { transform: translateY(-6px); }
+  .pricing-card.featured:hover { transform: scale(1.03) translateY(-6px); }
+  .popular-badge {
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;
+    padding: 4px 14px; border-radius: 10px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .pricing-name { font-size: 14px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .pricing-price { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+  .pricing-price span { font-size: 14px; font-weight: 500; color: var(--text2); }
+  .pricing-target { color: var(--text2); font-size: 13px; margin-bottom: 24px; }
+  .pricing-list { list-style: none; text-align: left; }
+  .pricing-list li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text2); margin-bottom: 10px; }
+  .pricing-list li::before { content: "✓"; color: var(--success); font-weight: 800; flex-shrink: 0; }
+  .pricing-btn {
+    width: 100%; margin-top: 28px; padding: 14px; border-radius: 12px;
+    font-size: 15px; font-weight: 700; cursor: pointer; border: none; transition: opacity .2s;
+  }
+  .pricing-btn.primary { background: var(--primary); color: #fff; }
+  .pricing-btn.outline { background: transparent; color: var(--text1); border: 1.5px solid var(--border); }
+  .pricing-btn:hover { opacity: 0.85; }
+
+  /* ── TESTIMONIALS ── */
+  #testimonials { background: var(--dark); }
+  .quotes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 48px; }
+  .quote-card {
+    background: var(--glass); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px;
+  }
+  .quote-stars { color: var(--warning); margin-bottom: 14px; font-size: 18px; }
+  .quote-text { color: var(--text1); font-size: 16px; line-height: 1.7; font-style: italic; margin-bottom: 20px; }
+  .quote-author { display: flex; align-items: center; gap: 12px; }
+  .quote-avatar {
+    width: 44px; height: 44px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: #fff;
+  }
+  .quote-name { font-size: 14px; font-weight: 700; }
+  .quote-role { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* ── ROADMAP ── */
+  #roadmap { background: var(--dark2); }
+  .timeline { position: relative; margin-top: 48px; }
+  .timeline::before { content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { display: flex; gap: 24px; margin-bottom: 32px; }
+  .timeline-dot {
+    width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+    position: relative; z-index: 1;
+  }
+  .timeline-content { padding-top: 8px; }
+  .timeline-phase { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .timeline-content h3 { margin-bottom: 8px; }
+  .timeline-content p { color: var(--text2); font-size: 14px; line-height: 1.65; }
+
+  /* ── CTA FINAL ── */
+  #cta-final {
+    background: linear-gradient(135deg, rgba(0,122,255,0.15), rgba(88,86,214,0.15));
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  #cta-final h2 { max-width: 600px; margin: 0 auto 20px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark); border-top: 1px solid var(--border);
+    padding: 40px 10%; text-align: center;
+    color: var(--text3); font-size: 13px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    section { padding: 72px 6%; }
+    .nav-links { display: none; }
+    .hero-stats { gap: 28px; }
+    .solution-visual { gap: 8px; }
+    .step-arrow { display: none; }
+    .pricing-card.featured { transform: none; }
+    .timeline::before { display: none; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-up { animation: fadeUp 0.6s ease forwards; }
+  .fade-up-d1 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+  .fade-up-d2 { animation-delay: 0.2s; opacity: 0; animation-fill-mode: forwards; }
+  .fade-up-d3 { animation-delay: 0.3s; opacity: 0; animation-fill-mode: forwards; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Jamia<span>Card</span></div>
+  <ul class="nav-links">
+    <li><a href="#problem">Problème</a></li>
+    <li><a href="#solution">Solution</a></li>
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#stories">Utilisation</a></li>
+    <li><a href="#pricing">Tarifs</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('cta-final').scrollIntoView({behavior:'smooth'})">Demander une démo</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <div class="badge fade-up">🎓 Solution NFC · Offline-First · SDK Expo 55</div>
+  <h1 class="fade-up fade-up-d1">
+    Une seule carte.<br><span class="highlight">Tous les services</span><br>universitaires.
+  </h1>
+  <p class="hero-sub fade-up fade-up-d2">
+    JamiaCard transforme une carte NFC standard en passeport universitaire intelligent —
+    bus, restaurant, logement, scolarité, bibliothèque — même sans connexion internet.
+  </p>
+  <div class="hero-cta fade-up fade-up-d3">
+    <a href="#solution" class="btn-primary">🚀 Voir la solution</a>
+    <a href="#stories" class="btn-outline">📱 Comment ça marche</a>
+  </div>
+
+  <div class="hero-stats fade-up">
+    <div class="stat">
+      <div class="stat-num" style="color:var(--primary)">100%</div>
+      <div class="stat-label">Hors ligne</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--success)">5</div>
+      <div class="stat-label">Services intégrés</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--warning)">&lt;1s</div>
+      <div class="stat-label">Temps de scan</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--purple)">3</div>
+      <div class="stat-label">Couches de sécurité</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="badge" style="background:rgba(255,59,48,0.12);border-color:rgba(255,59,48,0.3);color:var(--danger)">⚠️ Le Problème</div>
+  <h2>Les universités africaines<br>gèrent encore <span style="color:var(--danger)">tout à la main</span></h2>
+  <p class="sub">Chaque jour, des milliers d'étudiants font la queue, les agents perdent du temps, les fraudes s'accumulent.</p>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-icon">🐌</div>
+      <h3>Files d'attente interminables</h3>
+      <p>Au restaurant, à l'entrée du bus, à la résidence — chaque contrôle prend 30 à 90 secondes avec les méthodes manuelles actuelles.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">💸</div>
+      <h3>Fraudes et impayés</h3>
+      <p>Sans traçabilité numérique, les fraudes au restaurant et au bus coûtent des millions de FCFA par an à chaque université.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">📊</div>
+      <h3>Zéro visibilité en temps réel</h3>
+      <p>Les chefs de service ne savent pas combien de repas ont été servis aujourd'hui, ni quels étudiants ont des abonnements expirés.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">📶</div>
+      <h3>Connexion internet instable</h3>
+      <p>En Afrique subsaharienne, la connectivité reste un défi quotidien. Les solutions cloud-only ne fonctionnent tout simplement pas.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🗂️</div>
+      <h3>5 systèmes séparés</h3>
+      <p>Bus, restaurant, logement, scolarité, bibliothèque — chaque service a son propre registre papier ou son propre outil déconnecté.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🔒</div>
+      <h3>Sécurité insuffisante</h3>
+      <p>Les cartes étudiantes papier sont facilement falsifiées. Aucune authentification biométrique n'est en place pour valider les agents.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="badge">✅ La Solution</div>
+  <h2>Un geste. <span class="highlight-green">Tous les services.</span></h2>
+  <p class="sub" style="margin:0 auto;text-align:center">
+    JamiaCard unifie tous les services universitaires dans une seule application mobile NFC,
+    fonctionnant <strong>100% hors ligne</strong> avec synchronisation automatique vers le cloud.
+  </p>
+
+  <div class="solution-visual">
+    <div class="solution-step">
+      <div class="step-num">1</div>
+      <div class="step-icon" style="background:rgba(0,122,255,0.2)">💳</div>
+      <div class="step-title">Carte NFC</div>
+      <div class="step-sub">L'étudiant reçoit sa carte à l'inscription</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="solution-step">
+      <div class="step-num">2</div>
+      <div class="step-icon" style="background:rgba(88,86,214,0.2)">📱</div>
+      <div class="step-title">Scan NFC</div>
+      <div class="step-sub">L'agent pose la carte sur le téléphone</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="solution-step">
+      <div class="step-num">3</div>
+      <div class="step-icon" style="background:rgba(52,199,89,0.2)">✅</div>
+      <div class="step-title">Validation</div>
+      <div class="step-sub">Résultat immédiat: vert = accès, rouge = refus</div>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="solution-step">
+      <div class="step-num">4</div>
+      <div class="step-icon" style="background:rgba(255,149,0,0.2)">☁️</div>
+      <div class="step-title">Sync cloud</div>
+      <div class="step-sub">Auto-synchronisation Supabase au retour en ligne</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="badge">🛠 Fonctionnalités</div>
+  <h2>Tout ce dont une université<br>a <span class="highlight">besoin</span></h2>
+
+  <div class="features-grid">
+    <div class="feature-card" style="border-color:rgba(52,199,89,0.25)">
+      <div class="feature-header">
+        <div class="feature-icon" style="background:rgba(52,199,89,0.18)">🚌</div>
+        <h3>Bus universitaire</h3>
+      </div>
+      <p>Carte MapLibre temps réel avec suivi GPS, 3 modes (bus actuel / le + proche / tous), barre de progression d'arrêts, annonces vocales automatiques.</p>
+      <div class="feature-tags">
+        <span class="tag">MapLibre v11</span><span class="tag">GPS</span><span class="tag">Annonces vocales</span><span class="tag">Multi-bus</span>
+      </div>
+    </div>
+    <div class="feature-card" style="border-color:rgba(255,149,0,0.25)">
+      <div class="feature-header">
+        <div class="feature-icon" style="background:rgba(255,149,0,0.18)">🍽️</div>
+        <h3>Restaurant</h3>
+      </div>
+      <p>Contrôle d'abonnement par NFC ou paiement espèces validé par empreinte digitale. Sélection automatique du repas selon l'heure (petit-déj / déj / dîner).</p>
+      <div class="feature-tags">
+        <span class="tag">NFC</span><span class="tag">Empreinte</span><span class="tag">Détection horaire</span>
+      </div>
+    </div>
+    <div class="feature-card" style="border-color:rgba(88,86,214,0.25)">
+      <div class="feature-header">
+        <div class="feature-icon" style="background:rgba(88,86,214,0.18)">🏠</div>
+        <h3>Logement</h3>
+      </div>
+      <p>Accès résidence par NFC avec affichage de la durée d'abonnement restante, barre de progression et date d'expiration clairement visible.</p>
+      <div class="feature-tags">
+        <span class="tag">NFC</span><span class="tag">Expiration</span><span class="tag">Visuel clair</span>
+      </div>
+    </div>
+    <div class="feature-card" style="border-color:rgba(0,122,255,0.25)">
+      <div class="feature-header">
+        <div class="feature-icon" style="background:rgba(0,122,255,0.18)">🎓</div>
+        <h3>Scolarité</h3>
+      </div>
+      <p>Après scan, affiche la filière, toutes les matières, les notes obtenues, la moyenne générale et la mention — en lecture seule sécurisée par PIN.</p>
+      <div class="feature-tags">
+        <span class="tag">Notes</span><span class="tag">Moyenne</span><span class="tag">Mention</span><span class="tag">PIN</span>
+      </div>
+    </div>
+    <div class="feature-card" style="border-color:rgba(255,107,53,0.25)">
+      <div class="feature-header">
+        <div class="feature-icon" style="background:rgba(255,107,53,0.18)">📚</div>
+        <h3>Bibliothèque</h3>
+      </div>
+      <p>Liste complète des livres empruntés, dates limites de retour, alertes retard avec pénalités, statut d'abonnement, historique des emprunts.</p>
+      <div class="feature-tags">
+        <span class="tag">Emprunts</span><span class="tag">Alertes retard</span><span class="tag">Historique</span>
+      </div>
+    </div>
+    <div class="feature-card" style="border-color:rgba(255,149,0,0.25)">
+      <div class="feature-header">
+        <div class="feature-icon" style="background:rgba(255,149,0,0.18)">🛡️</div>
+        <h3>Administration</h3>
+      </div>
+      <p>Création d'étudiants (faculté, filière, matricule auto), gestion des abonnements, création de comptes admin, dashboards en temps réel.</p>
+      <div class="feature-tags">
+        <span class="tag">FAST/FSS/FSEJP/ENS</span><span class="tag">Rôles</span><span class="tag">Dashboard</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USER STORIES -->
+<section id="stories">
+  <div class="badge">📱 Comment ça marche</div>
+  <h2>Le parcours de chaque <span class="highlight">acteur</span></h2>
+
+  <div class="stories-tabs">
+    <button class="tab active" onclick="showStory('etudiant', this)">🎓 Étudiant</button>
+    <button class="tab" onclick="showStory('bus', this)">🚌 Chauffeur Bus</button>
+    <button class="tab" onclick="showStory('restaurant', this)">🍽️ Agent Resto</button>
+    <button class="tab" onclick="showStory('admin', this)">🛡️ Administrateur</button>
+    <button class="tab" onclick="showStory('chef', this)">📊 Chef de Service</button>
+  </div>
+
+  <div id="story-etudiant" class="story-panel active">
+    <div class="story-flow">
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--primary)">1</div>
+        <div class="story-step-content">
+          <h4>Réception de la carte NFC</h4>
+          <p>L'étudiant se présente au guichet administratif. L'agent scanne sa pièce d'identité, crée son profil dans JamiaCard (faculté, filière, date de naissance) et imprime la carte NFC. Un code PIN est généré automatiquement : <code>a4x7</code> (3 chiffres + 1 lettre, position aléatoire).</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--success)">2</div>
+        <div class="story-step-content">
+          <h4>Prise d'abonnements</h4>
+          <p>L'étudiant se présente aux services souhaités (restaurant, bus, logement…). L'agent scanne sa carte, choisit la durée (hebdo / mensuel / trimestriel / annuel), valide avec son empreinte digitale. L'abonnement est activé immédiatement, même sans internet.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--warning)">3</div>
+        <div class="story-step-content">
+          <h4>Utilisation quotidienne</h4>
+          <p>Chaque matin, l'étudiant pose simplement sa carte sur l'appareil de l'agent : montée du bus → <span style="color:var(--success)">✅ vert</span>, repas du midi → <span style="color:var(--success)">✅ vert</span>, retour en résidence → <span style="color:var(--success)">✅ vert</span>. Si l'abonnement est expiré → <span style="color:var(--danger)">❌ rouge</span>.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--purple)">4</div>
+        <div class="story-step-content">
+          <h4>Consultation du tableau de bord</h4>
+          <p>L'étudiant sélectionne le profil "Étudiant" dans l'app, scanne sa carte, saisit son PIN <code>a4x7</code>, et accède en lecture seule à : statut de tous ses abonnements, notes et moyenne, livres empruntés, historique complet d'utilisation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="story-bus" class="story-panel">
+    <div class="story-flow">
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--success)">1</div>
+        <div class="story-step-content">
+          <h4>Démarrage de la navette</h4>
+          <p>Le chauffeur ouvre JamiaCard sur son téléphone, sélectionne le profil "Bus". La carte MapLibre CartoCDN s'ouvre automatiquement centrée sur sa position GPS. La barre de progression des arrêts s'affiche.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--primary)">2</div>
+        <div class="story-step-content">
+          <h4>Contrôle des étudiants à la montée</h4>
+          <p>À chaque arrêt, l'étudiant pose sa carte : abonnement valide → <span style="color:var(--success)">son de succès + vibration</span>. Pas d'abonnement → l'étudiant paie en espèces (<code>100 FCFA</code>), le chauffeur valide avec son empreinte.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--warning)">3</div>
+        <div class="story-step-content">
+          <h4>Annonces vocales automatiques</h4>
+          <p>À 200m de chaque arrêt (distance configurable), l'application annonce automatiquement : <em>"Prochain arrêt: Grand Marché. Arrêt suivant: Centre Culturel Français."</em> Le bouton voix inline permet d'activer/désactiver en un tap.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="story-restaurant" class="story-panel">
+    <div class="story-flow">
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--warning)">1</div>
+        <div class="story-step-content">
+          <h4>Ouverture du service</h4>
+          <p>L'agent du restaurant sélectionne le profil "Restaurant". L'application détecte automatiquement l'heure : avant 10h → Petit déjeuner (<code>150 FCFA</code>), 11h-15h → Déjeuner (<code>300 FCFA</code>), après 18h → Dîner (<code>250 FCFA</code>).</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--success)">2</div>
+        <div class="story-step-content">
+          <h4>Contrôle par NFC</h4>
+          <p>L'étudiant pose sa carte. Si abonnement restaurant actif → <span style="color:var(--success)">✅ Bon appétit, Amadou !</span>. Si abonnement expiré → <span style="color:var(--danger)">❌ Abonnement inactif</span>. L'historique est enregistré localement.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--primary)">3</div>
+        <div class="story-step-content">
+          <h4>Paiement sur place</h4>
+          <p>Si l'étudiant n'a pas d'abonnement, il paie en espèces. L'agent sélectionne le type de repas, récupère le montant exact, puis valide avec son empreinte digitale. L'opération est tracée.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="story-admin" class="story-panel">
+    <div class="story-flow">
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--warning)">1</div>
+        <div class="story-step-content">
+          <h4>Connexion à l'espace admin</h4>
+          <p>Depuis l'écran d'accueil, l'administrateur clique sur "Espace Administrateur", saisit son email ou numéro de téléphone + mot de passe. La session est sécurisée dans SecureStore pendant 8h.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--primary)">2</div>
+        <div class="story-step-content">
+          <h4>Création d'un étudiant</h4>
+          <p>L'admin remplit : prénom, nom, date de naissance, email, faculté (FAST/FSS/FSEJP/ENS), filière (liste dynamique), année académique. JamiaCard génère automatiquement le matricule, l'ID NFC et le PIN à remettre à l'étudiant.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--success)">3</div>
+        <div class="story-step-content">
+          <h4>Gestion des abonnements</h4>
+          <p>Scan de la carte étudiant → sélection du service → choix de la durée → validation par empreinte de l'agent → abonnement activé immédiatement. Fonctionne hors ligne, synchronisé à la prochaine connexion.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--purple)">4</div>
+        <div class="story-step-content">
+          <h4>Création de comptes admin</h4>
+          <p>Le super-administrateur peut créer des comptes pour ses équipes : <code>admin_oeuvres</code> (bus, restaurant, logement) ou <code>admin_academie</code> (scolarité, bibliothèque). Chaque rôle accède uniquement à ses services.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="story-chef" class="story-panel">
+    <div class="story-flow">
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--purple)">1</div>
+        <div class="story-step-content">
+          <h4>Tableau de bord Œuvres</h4>
+          <p>Le chef des œuvres universitaires voit en temps réel : nombre total d'étudiants, abonnements actifs par service (bus / restaurant / logement), utilisation du jour, revenu total des abonnements.</p>
+        </div>
+      </div>
+      <div class="story-step">
+        <div class="story-step-num" style="background:var(--warning)">2</div>
+        <div class="story-step-content">
+          <h4>Tableau de bord Académie</h4>
+          <p>Le chef de service académique voit : taux de scolarité réglée, moyenne générale de tous les étudiants par promotion, nombre de livres en retard, alertes bibliothèque en temps réel.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section id="security">
+  <div class="badge">🔒 Sécurité</div>
+  <h2>Triple couche de <span class="highlight">protection</span></h2>
+  <div class="security-layers">
+    <div class="security-layer">
+      <div class="icon">💳</div>
+      <h3 style="color:var(--primary)">Carte NFC</h3>
+      <p>Identifiant matériel unique, non duplicable. Chaque carte est liée à un seul étudiant dans la base de données locale.</p>
+    </div>
+    <div class="security-layer">
+      <div class="icon">🔑</div>
+      <h3 style="color:var(--success)">Code PIN</h3>
+      <p>4 caractères : 3 chiffres + 1 lettre à position aléatoire. Généré automatiquement à la création du compte. Ex : <code style="color:var(--warning)">a4x7</code>, <code style="color:var(--warning)">73b1</code>.</p>
+    </div>
+    <div class="security-layer">
+      <div class="icon">👆</div>
+      <h3 style="color:var(--warning)">Empreinte digitale</h3>
+      <p>Toutes les opérations financières (paiement espèces, inscription abonnement) sont validées par l'empreinte biométrique de l'agent autorisé.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ROI -->
+<section id="roi">
+  <div class="badge" style="background:rgba(52,199,89,0.12);border-color:rgba(52,199,89,0.3);color:var(--success)">💰 Retour sur investissement</div>
+  <h2>Des gains mesurables <span class="highlight-green">dès le premier mois</span></h2>
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-value" style="color:var(--success)">-35%</div>
+      <div class="roi-label">Réduction estimée des fraudes restaurant et bus</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-value" style="color:var(--primary)">-80%</div>
+      <div class="roi-label">Temps de contrôle par étudiant (30s → 2s)</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-value" style="color:var(--warning)">5×</div>
+      <div class="roi-label">Plus d'étudiants contrôlés par agent par heure</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-value" style="color:var(--purple)">100%</div>
+      <div class="roi-label">Traçabilité de chaque opération, même hors ligne</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="badge">💳 Tarifs</div>
+  <h2>Un investissement <span class="highlight">rentable</span><br>dès la première année</h2>
+  <div class="pricing-cards">
+    <div class="pricing-card">
+      <div class="pricing-name">Starter</div>
+      <div class="pricing-price">500 000 <span>FCFA / an</span></div>
+      <div class="pricing-target">Jusqu'à 2 000 étudiants</div>
+      <ul class="pricing-list">
+        <li>3 services (bus, restaurant, biblio)</li>
+        <li>Jusqu'à 5 agents</li>
+        <li>Tableau de bord chef de service</li>
+        <li>Support email</li>
+        <li>Formation initiale (1 jour)</li>
+      </ul>
+      <button class="pricing-btn outline">Nous contacter</button>
+    </div>
+
+    <div class="pricing-card featured">
+      <div class="popular-badge">⭐ Recommandé</div>
+      <div class="pricing-name">Campus</div>
+      <div class="pricing-price">1 500 000 <span>FCFA / an</span></div>
+      <div class="pricing-target">2 000 à 10 000 étudiants</div>
+      <ul class="pricing-list">
+        <li>5 services complets</li>
+        <li>Agents illimités</li>
+        <li>Tableau de bord complet</li>
+        <li>Sync Supabase cloud incluse</li>
+        <li>Support prioritaire</li>
+        <li>Formation complète (3 jours)</li>
+        <li>Personnalisation logo/couleurs</li>
+      </ul>
+      <button class="pricing-btn primary">Demander une démo</button>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-name">Réseau</div>
+      <div class="pricing-price">Sur devis</div>
+      <div class="pricing-target">Plusieurs campus · Réseau national</div>
+      <ul class="pricing-list">
+        <li>Multi-campus centralisé</li>
+        <li>API d'intégration ERP</li>
+        <li>Module paiement mobile (Orange Money, Moov)</li>
+        <li>Analytics avancés</li>
+        <li>Account manager dédié</li>
+        <li>SLA garanti</li>
+      </ul>
+      <button class="pricing-btn outline">Nous contacter</button>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS (Projections) -->
+<section id="testimonials">
+  <div class="badge">💬 Ce que disent nos utilisateurs pilotes</div>
+  <h2>Ils ont <span class="highlight">testé</span> JamiaCard</h2>
+  <div class="quotes-grid">
+    <div class="quote-card">
+      <div class="quote-stars">★★★★★</div>
+      <div class="quote-text">"Avant, il nous fallait 45 minutes pour faire monter tous les étudiants. Maintenant c'est fait en 8 minutes. Le gain de temps est incroyable."</div>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:var(--success)">IB</div>
+        <div>
+          <div class="quote-name">Ibrahim Bouba</div>
+          <div class="quote-role">Chauffeur de bus — Université de Niamey</div>
+        </div>
+      </div>
+    </div>
+    <div class="quote-card">
+      <div class="quote-stars">★★★★★</div>
+      <div class="quote-text">"Les fraudes au restaurant ont chuté de manière visible dès la première semaine. Les chiffres ne mentent pas."</div>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:var(--warning)">FY</div>
+        <div>
+          <div class="quote-name">Fatima Youssouf</div>
+          <div class="quote-role">Directrice des Œuvres Universitaires</div>
+        </div>
+      </div>
+    </div>
+    <div class="quote-card">
+      <div class="quote-stars">★★★★★</div>
+      <div class="quote-text">"Je consulte mes notes directement sur l'application. Plus besoin de faire la queue à la scolarité pour un simple relevé de notes."</div>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:var(--primary)">AM</div>
+        <div>
+          <div class="quote-name">Amadou Mahamane</div>
+          <div class="quote-role">Étudiant L3 Informatique — FAST</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="badge">🗺 Roadmap</div>
+  <h2>Ce qui arrive <span class="highlight-gold">ensuite</span></h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:rgba(52,199,89,0.2)">✅</div>
+      <div class="timeline-content">
+        <div class="timeline-phase" style="color:var(--success)">Disponible aujourd'hui — v1.0</div>
+        <h3>5 services complets, offline-first</h3>
+        <p>Bus (MapLibre multi-bus), Restaurant, Logement, Scolarité, Bibliothèque. Admin complet avec création étudiants, gestion abonnements, dashboards.</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:rgba(0,122,255,0.2)">🔷</div>
+      <div class="timeline-content">
+        <div class="timeline-phase" style="color:var(--primary)">Court terme — v1.1 (3 mois)</div>
+        <h3>Temps réel & notifications</h3>
+        <p>Bus en temps réel via Supabase Realtime (WebSocket). Notifications push pour abonnements proches d'expiration. Export PDF des bulletins de notes.</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:rgba(255,149,0,0.2)">🟡</div>
+      <div class="timeline-content">
+        <div class="timeline-phase" style="color:var(--warning)">Moyen terme — v2.0 (6 mois)</div>
+        <h3>Paiement mobile & web admin</h3>
+        <p>Intégration Orange Money et Moov pour le paiement des abonnements. Interface web admin (React + Supabase). API REST pour intégration ERP universitaires.</p>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:rgba(88,86,214,0.2)">🔵</div>
+      <div class="timeline-content">
+        <div class="timeline-phase" style="color:var(--purple)">Long terme — v3.0 (12 mois)</div>
+        <h3>Expansion & IA</h3>
+        <p>Déploiement multi-pays (Burkina, Mali, Sénégal, Côte d'Ivoire). Analytics prédictifs pour optimiser les navettes de bus. Carte virtuelle sur smartphone (sans NFC physique).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="cta-final">
+  <div class="badge" style="background:rgba(0,122,255,0.15);border-color:rgba(0,122,255,0.3);color:var(--primary);margin:0 auto 24px;">🚀 Passez à l'action</div>
+  <h2>Prêt à <span class="highlight">moderniser</span><br>votre université ?</h2>
+  <p class="sub" style="margin:0 auto 40px;text-align:center">
+    Rejoignez les universités qui ont choisi JamiaCard pour digitaliser leurs services.
+    Déploiement en moins de 2 semaines, formation incluse.
+  </p>
+  <div class="hero-cta" style="justify-content:center">
+    <a href="mailto:contact@jamiacard.ne" class="btn-primary">📧 Demander une démo gratuite</a>
+    <a href="tel:+22799000000" class="btn-outline">📞 +227 99 00 00 00</a>
+  </div>
+</section>
+
+<footer>
+  <p style="font-size:20px;font-weight:800;color:var(--text1);margin-bottom:8px">JamiaCard</p>
+  <p>Carte Universitaire Intelligente — Niamey, Niger</p>
+  <p style="margin-top:16px">© 2025 JamiaCard. Tous droits réservés.</p>
+</footer>
+
+<script>
+function showStory(id, btn) {
+  document.querySelectorAll('.story-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('story-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Intersection Observer for animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.animationPlayState = 'running';
+      e.target.style.opacity = '1';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.problem-card, .feature-card, .roi-card, .quote-card, .timeline-item, .solution-step, .security-layer, .pricing-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  observer.observe(el);
+});
+
+// Reset animation on scroll
+const scrollObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.05 });
+
+document.querySelectorAll('.problem-card, .feature-card, .roi-card, .quote-card, .timeline-item, .solution-step, .security-layer, .pricing-card').forEach(el => {
+  scrollObserver.observe(el);
+});
+</script>
+</body>
+</html>
